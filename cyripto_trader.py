@@ -346,18 +346,6 @@ class Trader(object):
 
 
 if __name__ == "__main__":
-    # set my coin data
-    currency = "BTC"
-    # my_coin = "DASH"
-    my_coin = "ZEC"
-
-    # dust definitions
-    dust_total = 5.5
-    dust_amount = 50.0
-    min_spread = 0.0002
-    max_trading_amount = 3
-
     trader = Trader(polo_api_key, polo_api_secret, my_coin, currency, dust_total, dust_amount, min_spread, max_trading_amount)
-
     trader.run()
 
