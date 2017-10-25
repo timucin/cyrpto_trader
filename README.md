@@ -1,10 +1,11 @@
 # cyripto_trader
-Trading automation on poloniex cyriptocin exchange
+Trading automation on poloniex cyriptocoin exchange
 
 
 Using poloniex api python library from https://github.com/Aula13/poloniex
 
-to install dependencies use python pip command
+
+Tto install dependencies use python pip command
 
 pip install -r requiremenets.txt
 
