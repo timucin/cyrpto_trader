@@ -5,6 +5,8 @@ import decimal
 import datetime
 import time
 
+import argparse
+
 from poloniex import Poloniex
 
 # api keys are in the settings.py
@@ -325,7 +327,7 @@ class Trader(object):
             retval = self.add_buy_order()
 
 
-    def run(self):
+    def run_scalping(self):
         while True:
             now = datetime.datetime.now()
             print str(now)
@@ -360,8 +362,95 @@ class Trader(object):
             time.sleep(0.5)
 
 
+    def add_sell_all_order(self):
+        # compute the amount
+        self.sell_amount = self.total_coin_balance
+
+        print "self.sell_amount:", self.sell_amount
+        # send order to exchange
+        try:
+            retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
+        except:
+            print 'ERROR adding SELL ALL order.'
+            retval = False
+
+        print retval
+
+        return retval
+
+
+    def sell_all(self):
+        # cancel all buy orders first.
+        self.cancel_open_orders('buy')
+        # check open sell orders if the sell price is ok.
+        for order in self.open_orders_sell:
+            if order['price'] == self.sell_price:
+                print "order is ok:", order
+            else:
+                # cancel the order.
+                retval = self.cancel_open_order(order)
+
+        print 'self.open_orders_sell:', len(self.open_orders_sell)
+        if len(self.open_orders_sell) == 0:
+            print 'adding a new sell all order'
+            retval = self.add_sell_all_order()
+
+
+    def run_sell_all(self):
+        self.trade = 'sell'
+        while self.trade == 'sell':
+            now = datetime.datetime.now()
+            print str(now)
+
+            self.load_balances()
+            self.load_order_book()
+
+            print '%s Balance: %s' % (self.currency, self.total_currency_balance)
+            print '%s Balance: %s' % (self.coin, self.total_coin_balance)
+
+            self.sell_price = self.find_sell_price()
+            print "Sell Price:", self.sell_price
+
+            if self.total_coin_balance > 0.0:
+                print 'I have %s %s, will try to sell %s for %s.' % (self.total_coin_balance, self.coin, self.coin, self.currency)
+                self.trade = 'sell'
+                return True
+            else:
+                print 'I have nothing to trade.'
+                self.trade = False
+
+            if self.trade == 'sell':
+                self.sell_all()
+            else:
+                #Will not trade. Cancel all orders.
+                self.cancel_open_orders('buy')
+                self.cancel_open_orders('sell')
+
+            print "."
+            print "open orders:", self.open_orders
+            print "."
+            now = datetime.datetime.now()
+            print str(now)
+
+            print "Will wait a little bit for not to flood the exchange..."
+            time.sleep(0.5)
+
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'action', 
+        choices=['sell_all', 'buy_all', 'scalp'], 
+        help="What to do? sell_all, buy_all or scalp", 
+        )
+
+    args = parser.parse_args()
+    action = args.action
+
     trader = Trader(polo_api_key, polo_api_secret, my_coin, currency, dust_total, dust_amount, min_spread, max_trading_amount)
-    trader.run()
+
+    if action == "scalp":
+        trader.run_scalping()
+    elif action == "sell_all":
+        trader.run_sell_all()
 
