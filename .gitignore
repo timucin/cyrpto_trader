@@ -1,0 +1,5 @@
+*.pyc
+*.pyo
+*.tar.gz
+*.tar.bz2
+settings.py

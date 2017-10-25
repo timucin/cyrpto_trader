@@ -1,0 +1,4 @@
+DateTime==4.2
+poloniex==0.0.8
+requests==2.18.4
+urllib3==1.22
