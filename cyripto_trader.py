@@ -163,7 +163,7 @@ class Trader(object):
             if order['order_number'] is None:
                 total = self.make_satoshi(total + order["cur"])
                 if (order["amount"] >= dust_amount) or (total >= dust_total):
-                    return self.make_satoshi(order["price"] - self.make_satoshi("0.00000002"))
+                    return self.make_satoshi(order["price"] - self.make_satoshi("0.00000003"))
 
         return False
 
@@ -174,7 +174,7 @@ class Trader(object):
             if order['order_number'] is None:
                 total = self.make_satoshi(total + order["cur"])
                 if (order["amount"] >= dust_amount) or (total >= dust_total):
-                    return self.make_satoshi(order["price"] + self.make_satoshi("0.00000002"))
+                    return self.make_satoshi(order["price"] + self.make_satoshi("0.00000003"))
 
         return False
 
@@ -233,6 +233,7 @@ class Trader(object):
     def cancel_open_order(self, order):
         print "canceling order:", order
         retval = self.polo.cancelOrder(order["order_number"])
+        time.sleep(0.2)
         print "cancel order retval:", retval
         self.open_orders.remove(order)
         if order['type'] == 'sell':
@@ -339,8 +340,7 @@ class Trader(object):
             now = datetime.datetime.now()
             print str(now)
 
-            print "Will wait 1 seconds..."
-
+            print "Will wait a little bit for not to flood the exchange..."
             time.sleep(0.5)
 
 
