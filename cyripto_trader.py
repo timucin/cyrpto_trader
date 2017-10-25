@@ -341,7 +341,7 @@ class Trader(object):
 
             print "Will wait 1 seconds..."
 
-            time.sleep(1)
+            time.sleep(0.5)
 
 
 
