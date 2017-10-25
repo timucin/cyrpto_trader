@@ -221,7 +221,10 @@ class Trader(object):
         for order in self.open_orders:
             if order['type'] == buy_sell:
                 print "canceling order:", order
-                retval = self.polo.cancelOrder(order["order_number"])
+                try:
+                    retval = self.polo.cancelOrder(order["order_number"])
+                except:
+                    print 'ERROR canceling order.'
                 print "cancel order retval:", retval
                 self.open_orders.remove(order)
                 if buy_sell == 'sell':
@@ -232,7 +235,10 @@ class Trader(object):
 
     def cancel_open_order(self, order):
         print "canceling order:", order
-        retval = self.polo.cancelOrder(order["order_number"])
+        try:
+            retval = self.polo.cancelOrder(order["order_number"])
+        except:
+            print 'ERROR canceling order.'
         time.sleep(0.2)
         print "cancel order retval:", retval
         self.open_orders.remove(order)
