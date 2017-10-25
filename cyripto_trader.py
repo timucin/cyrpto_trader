@@ -224,6 +224,7 @@ class Trader(object):
                 try:
                     retval = self.polo.cancelOrder(order["order_number"])
                 except:
+                    retval = False
                     print 'ERROR canceling order.'
                 print "cancel order retval:", retval
                 self.open_orders.remove(order)
@@ -238,6 +239,7 @@ class Trader(object):
         try:
             retval = self.polo.cancelOrder(order["order_number"])
         except:
+            retval = False
             print 'ERROR canceling order.'
         time.sleep(0.2)
         print "cancel order retval:", retval
@@ -261,6 +263,7 @@ class Trader(object):
             retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
         except:
             print 'ERROR adding SELL order.'
+            retval = False
 
         print retval
 
@@ -298,6 +301,7 @@ class Trader(object):
             retval = self.polo.buy(currencyPair=self.my_pair, rate=self.buy_price, amount=self.buy_amount)
         except:
             print 'ERROR adding BUY order.'
+            retval = False
 
         print retval
 
