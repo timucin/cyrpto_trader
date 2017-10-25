@@ -9,23 +9,25 @@ import argparse
 
 from poloniex import Poloniex
 
-# api keys are in the settings.py
-# polo_api_key = "api-key-here"
-# polo_api_secret = "the_most_secret_api_secret"
+# api keys are in the settings.yaml
 try:
-    from settings import *
-except ImportError:
-    print "Api keys not found."
-    print "create a file named settings.py and put them here like this:"
-    print "polo_api_key = 'api-key-here'"
-    print "polo_api_secret = 'the_most_secret_api_secret'"
+    import yaml
+    with open('settings.yaml') as f:
+        settings = yaml.safe_load(f)
+        if not (settings and
+                settings.get('polo_api', None) and
+                settings['polo_api'].get('key', None) and
+                settings['polo_api'].get('secret', None)):
+            raise ValueError('api keys missing')
+
+except (ValueError, IOError):
+    print "settings not found."
+    print "create a file named settings.yaml and put them here like this:"
+    print "polo_api:"
+    print "  key: super_rich_acounts_api_key"
+    print "  secret: super_secret_top_secret"
+    print ""
     exit()
-
-
-# TO.DO: 
-# - use python logging module instead of prints. 
-# - implement error handling
-
 
 class Trader(object):
     def __init__(self, api_key, api_secret, coin, currency, dust_total=10, dust_amount=100.0, min_spread=0.0001, max_trading_amount=1):
@@ -447,10 +449,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
     action = args.action
 
-    trader = Trader(polo_api_key, polo_api_secret, my_coin, currency, dust_total, dust_amount, min_spread, max_trading_amount)
+    polo_api_key = settings['polo_api']['key']
+    polo_api_secret = settings['polo_api']['secret']
+    my_coin = settings['coin']['my_coin']
+    currency = settings['coin']['currency']
+    dust_total = settings['dust_total']
+    dust_amount = settings['dust_amount']
+    min_spread = settings['min_spread']
+    max_trading_amount = settings['max_trading_amount']
+ 
+    trader = Trader(polo_api_key, polo_api_secret, my_coin, currency,
+                    dust_total, dust_amount, min_spread, max_trading_amount)
 
     if action == "scalp":
         trader.run_scalping()
     elif action == "sell_all":
         trader.run_sell_all()
-
