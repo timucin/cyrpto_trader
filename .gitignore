@@ -3,3 +3,4 @@
 *.tar.gz
 *.tar.bz2
 settings.py
+settings.yaml
