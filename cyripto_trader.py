@@ -29,6 +29,7 @@ except (ValueError, IOError):
     print ""
     exit()
 
+
 class Trader(object):
     def __init__(self, api_key, api_secret, coin, currency, dust_total=10, dust_amount=100.0, min_spread=0.0001, max_trading_amount=1):
         # set currency pair
@@ -52,7 +53,6 @@ class Trader(object):
         self.currency_balance = self.make_satoshi('0.0')
         self.total_coin_balance = self.make_satoshi('0.0')
         self.total_currency_balance = self.make_satoshi('0.0')
-        self.min_currency_balance = self.make_satoshi('0.00100000')
 
         self.open_orders_raw = []
         self.open_orders = []
@@ -70,6 +70,11 @@ class Trader(object):
         self.sell_amount = self.make_satoshi('0.0')
         self.buy_amount = self.make_satoshi('0.0')
         self.trade = False
+
+        # those are hardcoded. may be added to settings later.
+        self.min_currency_balance = self.make_satoshi('0.00100000')
+        # seconds to wait for exchange rate limits.
+        self.exchange_wait_time = 0.8
 
 
     def make_satoshi(self, num):
@@ -361,7 +366,7 @@ class Trader(object):
             print str(now)
 
             print "Will wait a little bit for not to flood the exchange..."
-            time.sleep(0.5)
+            time.sleep(self.exchange_wait_time)
 
 
     def add_sell_all_order(self):
@@ -416,7 +421,6 @@ class Trader(object):
             if self.total_coin_balance > 0.0:
                 print 'I have %s %s, will try to sell %s for %s.' % (self.total_coin_balance, self.coin, self.coin, self.currency)
                 self.trade = 'sell'
-                return True
             else:
                 print 'I have nothing to trade.'
                 self.trade = False
@@ -435,7 +439,84 @@ class Trader(object):
             print str(now)
 
             print "Will wait a little bit for not to flood the exchange..."
-            time.sleep(0.5)
+            time.sleep(self.exchange_wait_time)
+
+
+    def add_buy_all_order(self):
+        # compute the amount
+        if self.total_currency_balance > self.make_satoshi('0.00001000'):
+            self.buy_amount = self.make_satoshi(self.total_currency_balance / self.buy_price) - self.make_satoshi('0.00000001')
+            print "Buying amount:", self.buy_amount
+        else:
+            print "Buying amount is low. not buying:"
+            return False
+
+        # send order to exchange
+        try:
+            retval = self.polo.buy(currencyPair=self.my_pair, rate=self.buy_price, amount=self.buy_amount)
+        except:
+            print 'ERROR adding BUY ALL order.'
+            retval = False
+
+        print retval
+
+        return retval
+
+
+    def buy_all(self):
+        # cancel all buy orders first.
+        self.cancel_open_orders('sell')
+        # check open sell orders if the sell price is ok.
+        for order in self.open_orders_buy:
+            if order['price'] == self.buy_price:
+                print "order is ok:", order
+            else:
+                # cancel the order.
+                retval = self.cancel_open_order(order)
+
+        print 'self.open_orders_buy:', len(self.open_orders_buy)
+        if len(self.open_orders_buy) == 0:
+            print 'adding a new buy all order'
+            retval = self.add_buy_all_order()
+
+
+    def run_buy_all(self):
+        self.trade = 'buy'
+        while self.trade == 'buy':
+            now = datetime.datetime.now()
+            print str(now)
+
+            self.load_balances()
+            self.load_order_book()
+
+            print '%s Balance: %s' % (self.currency, self.total_currency_balance)
+            print '%s Balance: %s' % (self.coin, self.total_coin_balance)
+
+            self.buy_price = self.find_buy_price()
+            print "Buy Price:", self.buy_price
+
+            if self.total_currency_balance > self.min_currency_balance:
+                print 'I have %s %s, will try to buy %s.' % (self.total_currency_balance, self.currency, self.coin)
+                self.trade = 'buy'
+            else:
+                print 'I have nothing to trade.'
+                self.trade = False
+
+            if self.trade == 'buy':
+                self.buy_all()
+            else:
+                #Will not trade. Cancel all orders.
+                self.cancel_open_orders('buy')
+                self.cancel_open_orders('sell')
+
+            print "."
+            print "open orders:", self.open_orders
+            print "."
+            now = datetime.datetime.now()
+            print str(now)
+
+            print "Will wait a little bit for not to flood the exchange..."
+            time.sleep(self.exchange_wait_time)
 
 
 if __name__ == "__main__":
@@ -465,3 +546,5 @@ if __name__ == "__main__":
         trader.run_scalping()
     elif action == "sell_all":
         trader.run_sell_all()
+    elif action == "buy_all":
+        trader.run_buy_all()
