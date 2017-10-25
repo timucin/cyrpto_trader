@@ -251,7 +251,10 @@ class Trader(object):
 
         print "self.sell_amount:", self.sell_amount
         # send order to exchange
-        retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
+        try:
+            retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
+        except:
+            print 'ERROR adding SELL order.'
 
         print retval
 
@@ -285,7 +288,10 @@ class Trader(object):
             return False
 
         # send order to exchange
-        retval = self.polo.buy(currencyPair=self.my_pair, rate=self.buy_price, amount=self.buy_amount)
+        try:
+            retval = self.polo.buy(currencyPair=self.my_pair, rate=self.buy_price, amount=self.buy_amount)
+        except:
+            print 'ERROR adding BUY order.'
 
         print retval
 
