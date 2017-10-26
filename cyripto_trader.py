@@ -135,7 +135,7 @@ class Trader(object):
 
 
     def load_order_book(self):
-        self.order_book_raw = self.polo.returnOrderBook(currencyPair=self.my_pair, depth='100')
+        self.order_book_raw = self.polo.returnOrderBook(currencyPair=self.my_pair, depth='200')
         self.order_book["buy"] = []
         self.order_book["sell"] = []
         self.process_order_book('buy', self.order_book_raw["bids"])
@@ -374,16 +374,19 @@ class Trader(object):
         self.sell_amount = self.total_coin_balance
 
         print "self.sell_amount:", self.sell_amount
-        # send order to exchange
-        try:
-            retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
-        except:
-            print 'ERROR adding SELL ALL order.'
-            retval = False
+        if self.sell_amount:
+            # send order to exchange
+            try:
+                retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
+            except:
+                print 'ERROR adding SELL ALL order.'
+                retval = False
 
-        print retval
+            print retval
 
-        return retval
+            return retval
+        else:
+            return False
 
 
     def sell_all(self):
