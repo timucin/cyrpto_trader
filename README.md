@@ -1,4 +1,4 @@
-# cyripto_trader
+# cyrpto_trader
 Trading automation on poloniex cyriptocoin exchange
 
 
@@ -13,13 +13,17 @@ pip install -r requiremenets.txt
 # Usage
 
 To sell coins use this:
+
 python cyripto_trader.py sell_all
 
+
 To buy coins with all your BTC balance use this:
+
 python cyripto_trader.py buy_all
 
 
 To use the basic ping-pong scalping strategy (highly risky!):
+
 python cyripto_trader.py scalp
 
 
