@@ -171,7 +171,7 @@ class Trader(object):
         for order in self.order_book['sell']:
             if order['order_number'] is None:
                 total = self.make_satoshi(total + order["cur"])
-                if (order["amount"] >= dust_amount) or (total >= dust_total):
+                if (order["amount"] >= self.dust_amount) or (total >= self.dust_total):
                     return self.make_satoshi(order["price"] - self.make_satoshi("0.00000003"))
 
         return False
@@ -182,7 +182,7 @@ class Trader(object):
         for order in self.order_book['buy']:
             if order['order_number'] is None:
                 total = self.make_satoshi(total + order["cur"])
-                if (order["amount"] >= dust_amount) or (total >= dust_total):
+                if (order["amount"] >= self.dust_amount) or (total >= self.dust_total):
                     return self.make_satoshi(order["price"] + self.make_satoshi("0.00000003"))
 
         return False
