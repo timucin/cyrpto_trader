@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 import decimal
 import datetime
 import time
@@ -29,9 +28,11 @@ except (ValueError, IOError):
     print ""
     exit()
 
-
 class Trader(object):
-    def __init__(self, api_key, api_secret, coin, currency, dust_total=10, dust_amount=100.0, min_spread=0.0001, max_trading_amount=1):
+    """Trader class
+    """
+    def __init__(self, api_key, api_secret, coin, currency, dust_total=10,
+                 dust_amount=100.0, min_spread=0.0001, max_trading_amount=1):
         # set currency pair
         self.coin = coin
         self.currency = currency
@@ -82,7 +83,9 @@ class Trader(object):
 
 
     def load_open_orders(self):
-        # loads open orders. Resets the balances so load_balances method should be called after.
+        """
+        loads open orders. Resets the balances so load_balances method should be called after.
+        """
         self.total_coin_balance = self.make_satoshi('0.0')
         self.total_currency_balance = self.make_satoshi('0.0')
         self.open_orders_raw = self.polo.returnOpenOrders(currencyPair=self.my_pair)
@@ -205,7 +208,8 @@ class Trader(object):
 
 
         if self.total_currency_balance > self.min_currency_balance:
-            print 'I have %s %s, will try to buy %s.' % (self.total_currency_balance, self.currency, self.coin)
+            print 'I have %s %s, will try to buy %s.' % (
+                self.total_currency_balance, self.currency, self.coin)
             self.trade = 'buy'
             return True
         else:
@@ -213,7 +217,9 @@ class Trader(object):
                 print 'Spread is good. Will trade'
                 # sell or buy?
                 if self.total_coin_balance > 0:
-                    print 'I have %s %s, will try to sell %s for %s.' % (self.total_coin_balance, self.coin, self.coin, self.currency)
+                    print 'I have %s %s, will try to sell %s for %s.' % (
+                        self.total_coin_balance, self.coin, self.coin,
+                        self.currency)
                     self.trade = 'sell'
                     return True
                 else:
@@ -232,7 +238,7 @@ class Trader(object):
                 print "canceling order:", order
                 try:
                     retval = self.polo.cancelOrder(order["order_number"])
-                except:
+                except RuntimeError:
                     retval = False
                     print 'ERROR canceling order.'
                 print "cancel order retval:", retval
@@ -247,7 +253,7 @@ class Trader(object):
         print "canceling order:", order
         try:
             retval = self.polo.cancelOrder(order["order_number"])
-        except:
+        except RuntimeError:
             retval = False
             print 'ERROR canceling order.'
         time.sleep(0.2)
@@ -270,7 +276,7 @@ class Trader(object):
         # send order to exchange
         try:
             retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
-        except:
+        except RuntimeError:
             print 'ERROR adding SELL order.'
             retval = False
 
@@ -308,7 +314,7 @@ class Trader(object):
         # send order to exchange
         try:
             retval = self.polo.buy(currencyPair=self.my_pair, rate=self.buy_price, amount=self.buy_amount)
-        except:
+        except RuntimeError:
             print 'ERROR adding BUY order.'
             retval = False
 
@@ -377,8 +383,10 @@ class Trader(object):
         if self.sell_amount:
             # send order to exchange
             try:
-                retval = self.polo.sell(currencyPair=self.my_pair, rate=self.sell_price, amount=self.sell_amount)
-            except:
+                retval = self.polo.sell(currencyPair=self.my_pair,
+                                        rate=self.sell_price,
+                                        amount=self.sell_amount)
+            except RuntimeError:
                 print 'ERROR adding SELL ALL order.'
                 retval = False
 
@@ -422,7 +430,9 @@ class Trader(object):
             print "Sell Price:", self.sell_price
 
             if self.total_coin_balance > 0.0:
-                print 'I have %s %s, will try to sell %s for %s.' % (self.total_coin_balance, self.coin, self.coin, self.currency)
+                print 'I have %s %s, will try to sell %s for %s.' % (
+                    self.total_coin_balance, self.coin, self.coin,
+                    self.currency)
                 self.trade = 'sell'
             else:
                 print 'I have nothing to trade.'
@@ -448,7 +458,8 @@ class Trader(object):
     def add_buy_all_order(self):
         # compute the amount
         if self.total_currency_balance > self.make_satoshi('0.00001000'):
-            self.buy_amount = self.make_satoshi(self.total_currency_balance / self.buy_price) - self.make_satoshi('0.00000001')
+            top = self.total_currency_balance / self.buy_price
+            self.buy_amount = self.make_satoshi(top) - self.make_satoshi('0.00000001')
             print "Buying amount:", self.buy_amount
         else:
             print "Buying amount is low. not buying:"
@@ -523,31 +534,31 @@ class Trader(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'action', 
-        choices=['sell_all', 'buy_all', 'scalp'], 
-        help="What to do? sell_all, buy_all or scalp", 
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument(
+        'action',
+        choices=['sell_all', 'buy_all', 'scalp'],
+        help="What to do? sell_all, buy_all or scalp",
         )
 
-    args = parser.parse_args()
-    action = args.action
+    ARGS = PARSER.parse_args()
+    ACTION = ARGS.action
 
-    polo_api_key = settings['polo_api']['key']
-    polo_api_secret = settings['polo_api']['secret']
-    my_coin = settings['coin']['my_coin']
-    currency = settings['coin']['currency']
-    dust_total = settings['dust_total']
-    dust_amount = settings['dust_amount']
-    min_spread = settings['min_spread']
-    max_trading_amount = settings['max_trading_amount']
- 
-    trader = Trader(polo_api_key, polo_api_secret, my_coin, currency,
-                    dust_total, dust_amount, min_spread, max_trading_amount)
+    POLO_API_KEY = settings['polo_api']['key']
+    POLO_API_SECRET = settings['polo_api']['secret']
+    TRACE_CURRENCY = settings['coin']['my_coin']
+    RETURN_CURRENCY = settings['coin']['currency']
+    DUST_TOTAL = settings['dust_total']
+    DUST_AMOUNT = settings['dust_amount']
+    MIN_SPREAD = settings['min_spread']
+    MAX_TRADING_AMOUNT = settings['max_trading_amount']
 
-    if action == "scalp":
-        trader.run_scalping()
-    elif action == "sell_all":
-        trader.run_sell_all()
-    elif action == "buy_all":
-        trader.run_buy_all()
+    TRADER = Trader(POLO_API_KEY, POLO_API_SECRET, TRACE_CURRENCY, RETURN_CURRENCY,
+                    DUST_TOTAL, DUST_AMOUNT, MIN_SPREAD, MAX_TRADING_AMOUNT)
+
+    if ACTION == "scalp":
+        TRADER.run_scalping()
+    elif ACTION == "sell_all":
+        TRADER.run_sell_all()
+    elif ACTION == "buy_all":
+        TRADER.run_buy_all()
