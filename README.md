@@ -1,4 +1,8 @@
 # cyrpto_trader
+This project is moved to gitlab. 
+
+https://gitlab.com/timucin/cyrpto_trader
+
 
 Trading automation on poloniex cryptocoin exchange
 
