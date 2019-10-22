@@ -1,5 +1,5 @@
 DateTime==4.2
 poloniex==0.0.10
-requests==2.18.4
+requests==2.20.0
 urllib3==1.24.2
 PyYAML==3.12
