@@ -58,4 +58,4 @@ docker run crypto_traders
 You can send me some small amount of BTC if you like. 
 I may use it to test this better or I'll buy some beers. :)
 
-**BTC :** 1AtiEpW9X97Z4RupdPVqnxGvc5pmAbCVTz
+**BTC :** 1JRGwEkSbpGXs3Csub46PVAQwReo4gcjq2
