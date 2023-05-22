@@ -1,5 +1,5 @@
 DateTime==4.2
 poloniex==0.0.10
-requests==2.20.0
+requests==2.31.0
 urllib3==1.26.5
 pyyaml>=5.4
